@@ -1,0 +1,4 @@
+cat /proc/device
+确认产生的主设备号是252或是其它
+mknod /dev/xxx c 252 0
+先创建 /dev/xxx 才能在app中open它
