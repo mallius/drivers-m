@@ -15,6 +15,10 @@ clean:
 	$(MAKE) -C $(KERNEL_DIR) M=`pwd` modules clean
 	rm -rf Module.symvers
 	rm -rf $(APP_TARGET)
+cl:
+	$(MAKE) -C $(KERNEL_DIR) M=`pwd` modules clean
+	rm -rf Module.symvers
+	rm -rf $(APP_TARGET)
 cp:
 	cp *.ko $(ROOT_NFS)
 	cp $(APP_TARGET) $(ROOT_NFS)

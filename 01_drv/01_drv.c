@@ -19,11 +19,15 @@
 #include <linux/cdev.h>
 #include <linux/mutex.h>
 #include <linux/backing-dev.h>
+#include <linux/device.h>
 
 #ifdef CONFIG_KMOD
 #include <linux/kmod.h>
 #endif
 
+
+struct class *first_class;
+struct class_device *first_class_dev;
 
 int first_open (struct inode *inode, struct file *file)
 {
@@ -56,15 +60,21 @@ struct file_operations f_ops = {
 int major;
 void first_init(void)
 {
-	major = register_chrdev(0, "firs_drv",&f_ops);
+	major = register_chrdev(0, "first_drv",&f_ops);	//名字不重要 cat /proc/devices时显示252设备号和名字
+
 }
 
 void first_exit(void)
 {
 	
-	unregister_chrdev(major, "first_drv");
+	unregister_chrdev(major, "first_drv");       //名字不重要，"first"也可以
 }
 
 module_init(first_init)
 module_exit(first_exit)
+MODULE_LICENSE("GPL");
+
+
+
+
 

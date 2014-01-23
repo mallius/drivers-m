@@ -8,7 +8,7 @@ int main(void)
 {
 	int fd;
 	int buf;
-	fd = open("/dev/xxx", O_RDWR);
+	fd = open("/dev/xyz", O_RDWR);
 	if(fd < 0)
 	{
 		printf("Can not open.\n");
