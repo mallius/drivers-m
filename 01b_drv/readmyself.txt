@@ -1,0 +1,31 @@
+******************01_drv*********************************
+insmod 01_drv.ko
+lsmod
+cat /proc/device
+确认产生的主设备号是252或是其它
+mknod /dev/xxx c 252 0
+先创建 /dev/xxx 才能在app中open它
+rmmod 01_drv
+
+
+
+注意：
+rmmod 01_drv时出现如下信息，无法卸载驱动
+rmmod: chdir(2.6.22.6): No such file or directory
+
+
+mv /lib/modules/2.6.22.6-FriendlyArm /lib/modules/2.6.22.6
+******************01_drv*********************************
+
+
+
+
+
+*************************01b_drv*************************
+insmod 01b_drv.ko
+cat /proc/devices下出现252的设备和名字
+ls /sys/class/firstdrv/xyz  ---> /dev/xyz   （class自动生成）
+./test01b
+
+rmmod 01b_drv
+*************************01b_drv*************************
