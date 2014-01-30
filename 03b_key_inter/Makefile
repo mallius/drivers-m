@@ -4,9 +4,9 @@ MAKE=make
 CC=arm-linux-gcc
 
 #改这里
-APP=test03a.c   			#测试程序
-APP_TARGET=test03a
-OBJ=03a_drv.o
+APP=test03b.c   			#测试程序
+APP_TARGET=test03b
+OBJ=03b_drv.o
 
 
 
