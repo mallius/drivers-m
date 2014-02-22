@@ -142,7 +142,7 @@ static int s3c_nand_init(void)
 #define TACLS 0
 #define TWRPH0 1
 #define TWRPH1 0
-	s3c_nand_regs->nfcont = (TACLS << 12) | (TWRPH0 << 8) | (TWRPH1 << 4);
+	s3c_nand_regs->nfconf = (TACLS << 12) | (TWRPH0 << 8) | (TWRPH1 << 4);
 
 
 	DBG;
