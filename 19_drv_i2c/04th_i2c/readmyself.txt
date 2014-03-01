@@ -1,0 +1,338 @@
+编译前：
+JZ2440提供的内核2.6.22.6
+patch -p1 <补丁文件
+cp config_ok .config
+
+JZ2440的厂家内核移植到mini2440并使用mini2440的文件系统
+（1）MACHINE_START(MINI2440， "MINI2440")
+		mach-smdk2440.c中改一下
+（2）然后加入1999（arch/arm/tools/mach-types）
+		mini2440  MACH_MINI2440	 MINI2440  1999
+
+（3）make menuconfig选上Kernel Features -->
+			Memory split---->
+			[*]Use....EABI...
+			[*]....ABI....
+（4）root-qtopia
+	/lib/modules/2.6.22.6
+
+
+
+
+******************01_drv*********************************
+insmod 01_drv.ko
+lsmod
+cat /proc/device
+确认产生的主设备号是252或是其它
+mknod /dev/xxx c 252 0
+先创建 /dev/xxx 才能在app中open它
+rmmod 01_drv
+
+
+
+注意：
+rmmod 01_drv时出现如下信息，无法卸载驱动
+rmmod: chdir(2.6.22.6): No such file or directory
+
+
+mv /lib/modules/2.6.22.6-FriendlyArm /lib/modules/2.6.22.6
+******************01_drv*********************************
+
+
+
+
+
+*************************01b_drv*************************
+insmod 01b_drv.ko
+cat /proc/devices下出现252的设备和名字
+ls /sys/class/firstdrv/xyz  ---> /dev/xyz   （class自动生成）
+./test01b
+
+rmmod 01b_drv
+*************************01b_drv*************************
+
+
+
+
+
+
+
+*************************01c_drv*************************
+insmod 01c_drv.ko
+./test01c on  --> LED01亮
+./test01c off --> LED01灭
+*************************01c_drv*************************
+
+
+
+*************************02_drv*************************
+insmod 02_drv.ko
+./test02 &
+按键K1，K2，K3，K4测试
+用top命令查看CPU的使用情况
+*************************02_drv*************************
+
+
+
+
+
+
+
+
+*************************03a_drv*************************
+(1)
+insmod 03a_drv.ko
+ls /sys/class/third_key_drv/keys    --> 有
+cat /proc/devices  -->  252 third_drv 有
+
+cat /proc/interrupts
+没有K1，K2，K3，K4
+
+(2)
+exec 5</dev/keys  (turn off: exec 5<&-)
+cat /proc/interrupts
+有K1，K2，K3，K4,然后可以按键了K1，K2，K3，K4
+
+exec 5<&-
+rmmod 03a_drv.ko
+
+*************************03a_drv*************************
+
+
+
+
+
+
+
+
+*************************03b_drv*************************
+insmod 03b_drv.ko
+./test03b &
+可以按键了
+*************************03b_drv*************************
+
+
+
+
+
+
+
+*************************04_drv*************************
+insmod 04_drv.ko
+./test04 &
+超时后会打印：time out...
+按键仍有反应
+*************************04_drv*************************
+
+
+
+
+
+
+*************************05_drv*************************
+insmod 04_drv.ko
+./test04 &
+由驱动通知应用程序
+*************************05_drv*************************
+
+
+
+
+
+
+*************************06a_drv*************************
+insmod 06a_drv.ko
+./test06a &
+可以正常按键
+再打开一个 ./test06a &  ---> Can not open 打开失败
+
+*************************06a_drv*************************
+
+
+
+
+
+
+*************************06b_drv*************************
+insmod 06b_drv.ko
+./test06b &
+./test06b &
+运行两个APP
+ps查看
+其中一个是S（睡眠状态），另一个是D（僵死状态）
+kill -9 PID（睡眠状态的pid）
+
+再ps查看，D变成了S状态
+
+*************************06b_drv*************************
+
+
+
+
+*************************06c_drv*************************
+
+insmod 06c_drv.ko
+./test06c &
+时间到后没有按键就返回，返回值 ret = -1
+按键按下时，就显示按键值，返回值 ret = 1
+
+*************************06c_drv*************************
+
+
+
+
+
+
+*************************07_drv*************************
+insmod 07_drv.ko
+./test07 &
+连续快速按键，下降沿和上升沿触发都是成对出现，不会抖动了。
+
+*************************07_drv*************************
+
+
+
+*************************08_drv*************************
+insmod 08_drv.ko
+cat /dev/tty1
+按K1，K2，K3无显示
+再按K3，（ENTER），则显示ls
+*************************08_drv*************************
+
+
+
+*************************09_drv*************************
+insmod 09_drv.ko
+insmod 09_dev.ko   //显示找到驱动
+./test09 on
+./test09 off
+
+在09_dev.c中可以改5为6, 小灯变成LED
+
+*************************09_drv*************************
+
+
+
+
+*************************10_drv_lcd*************************
+
+wait, problem of insmod three cfb*.ko
+
+
+*************************10_drv_lcd*************************
+
+
+
+*************************11_drv_ts*************************
+02th:
+去掉2.66.2.66-jz内核的ts驱动程序
+Device device
+	Input device
+		Generice input layer
+			Touch screens
+				<　>S3c2410 touchscreen
+
+make uImage -j2
+使用新内核
+tftp 0x30008000 uImage
+nand erase 60000 500000
+nand write 0x30008000 0x60000 0x500000
+
+insmod 11_drv_ts.ko
+可以碰触摸屏，pen down,pen up
+
+
+07th:
+加入滑动长按显示值  ---> wait for debug
+下面还是要用到LCD
+*************************11_drv_ts*************************
+
+
+
+
+
+
+
+
+
+
+
+*************************12_drv_mouse_key*************************
+01th:
+最简单的usb驱动框架
+接入鼠标后，时钟low speed device ，去掉驱动依旧如此 ---> wait for debug
+*************************12_drv_mouse_key*************************
+
+
+
+
+
+
+
+
+*************************13_ramblock******************************
+01th:
+insmod 13_ramblock.ko
+
+显示:
+	do_ramblock_queue: 1
+
+02th:
+加上电梯算法
+ls /dev/ramblock
+cat /proc/device    ---->254 ramblock
+
+
+03th:
+insmod 13_ramblock.ko
+mkdosfs /dev/ramblock    <-----用nfs_root文件夹下的fs_qtopia（百问网JZ2440V2主光盘）
+mount /dev/ramblock /tmp/
+vi /tmp/1.txt   ---->可以写文件了
+vi /tmp/2.txt
+
+umount /tmp/  -->卸载，再挂接后还是有1.txt和2.txt的
+cat /dev/ramblock > /mnt/ramblock.bin  --->到PC段去查看
+/work/root_qtopia-jz-mini2440
+mount -o loop ramblock.bin /mnt/
+ls /mnt/   
+		--->其中就有1.txt和2.txt
+*************************13_ramblock******************************
+
+
+
+
+
+*************************14_nand******************************
+insmod 14_nand.ko后，出错了
+需要调试debug
+*************************14_nand******************************
+
+
+
+
+*************************15_nor******************************
+falsh_eraseall 无法正常使用
+
+
+*************************15_nor******************************
+
+
+
+*************************19_i2c******************************
+1th:
+insmod at24cxx.ko
+
+2th:
+normal_addr改成force_addr, 0x50--->0x60(i2c-core.c)
+
+3th:
+rmmod at24cxx时显示 detach调用
+
+
+04th:
+ls -l /dev/at24cxx没有显示
+insmod at24cxx.ko显示atach
+ls -l /dev/at24cxx 有
+rmmod at24cxx 显示detach
+*************************19_i2c******************************
+
